@@ -25,7 +25,24 @@ def login():
 		print(e)
 
 def parse_project(s, match):
-	''' parse project '''
+	''' parse project 
+	0 bestellnr
+	1 service
+	2 Fach
+	3 klasse
+	4 ue
+	5 sprache
+	6 umsetzungsdauer
+	7 fachbereich
+	8 software
+	9 umfrage tool
+	10 wurde die umfrage bereits...
+	11 grund
+	12 themen
+	13 bei der auswertung dabei sein...
+	14 prüfungsdatum
+	15 umsetzungszeitraum
+	'''
 
 	oid = match.text.strip()
 	url = f'{base}/freelancer/requested_course_orders/{oid}/show'
@@ -33,23 +50,6 @@ def parse_project(s, match):
 	try:
 		r = s.get(url)
 		trs = BeautifulSoup(r.content, 'html5lib').findAll('tr', {'class': 'sonata-ba-view-container'})
-
-		# 0 bestellnr
-		# 1 service
-		# 2 Fach
-		# 3 klasse
-		# 4 ue
-		# 5 sprache
-		# 6 umsetzungsdauer
-		# 7 fachbereich
-		# 8 software
-		# 9 umfrage tool
-		# 10 wurde die umfrage bereits...
-		# 11 grund
-		# 12 themen
-		# 13 bei der auswertung dabei sein...
-		# 14 prüfungsdatum
-		# 15 umsetzungszeitraum
 
 		if len(trs[4].text.split()) > 1:
 			ue = trs[4].text.split()[1]
@@ -65,7 +65,6 @@ def parse_project(s, match):
 			software = trs[8].text.split()[1]
 		else:
 			software = 'Keine Angabe'
-
 
 		d = {
 			'Bestellnummer': trs[0].text.split()[1],
