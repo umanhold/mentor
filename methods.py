@@ -11,7 +11,6 @@ from definitions import *
 
 def login():
 	''' log in to plattform '''
-
 	s = requests.Session()
 	url = f'{base}/login'
 	try:
@@ -43,7 +42,6 @@ def parse_project(s, match):
 	14 prüfungsdatum
 	15 umsetzungszeitraum
 	'''
-
 	oid = match.text.strip()
 	url = f'{base}/freelancer/requested_course_orders/{oid}/show'
 
@@ -87,7 +85,6 @@ def parse_project(s, match):
 
 def parse_project_list(s):
 	''' parse project list '''
-
 	rlist = [None, None, s]
 	try:
 		r = s.get(f'{base}/freelancer/requested_course_orders/list')
@@ -109,14 +106,21 @@ def parse_project_list(s):
 
 def loop():
 	''' check for new projects every SLEEP_INTERVAL_IN_S seconds '''
-
 	s = login()
 	while True:
 		try:
 			d, oid, s = parse_project_list(s)
 			if d != None:
-				if d['Service'] in SERVICE and d['Software'] in SOFTWARE:
-					r = s.get(f'{base}/freelancer/requested_course_orders/list/{oid}/acceptRequest')
+				if d['Service'] in SERVICE:
+					try:
+						r = s.get(f'{base}/freelancer/requested_course_orders/{oid}/denyRequest')
+					except Exception as e:
+						print(e)
+				elif d['Software'] in SOFTWARE:
+					try:
+						r = s.get(f'{base}/freelancer/requested_course_orders/{oid}/acceptRequest')
+					except Exception as e:
+						print(e)
 				else:
 					pass
 			else:
