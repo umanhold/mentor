@@ -67,6 +67,7 @@ def parse_project(s, match):
 		d = {
 			'Bestellnummer': trs[0].text.split()[1],
 			'Service': trs[1].text.split()[1],
+			'Fach': trs[2].text.split()[1],
 			'UE': ue,
 			'Sprache': sprache,
 			'Umsetzungsdauer': trs[6].text.split()[1],
@@ -106,12 +107,31 @@ def parse_project_list(s):
 
 def loop():
 	''' check for new projects every SLEEP_INTERVAL_IN_S seconds '''
+
+	d_pre = {}
 	s = login()
 	while True:
 		try:
 			d, oid, s = parse_project_list(s)
-			if d != None:
-				if d['Service'] in SERVICE:
+			if d != None and d != d_pre:
+
+				
+				project_description = (
+					"\n\n"
+					+"Service: "+d["Service"]+"\n"
+					+"Fach: "+d["Fach"]+"\n"
+					+"UE: "+d["UE"]+"\n"
+					+'Sprache: '+ d['Sprache']+'\n'
+					+'Fachbereich: '+d['Fachbereich']+'\n'
+					+'Software: '+d['Software']+'\n'
+					+'Von: '+d['Von']+'\n'
+					+'Bis: '+d['Bis']+'\n\n'
+				)
+
+				print(project_description)
+
+
+				if d['Fach'] in FACH:
 					try:
 						r = s.get(f'{base}/freelancer/requested_course_orders/{oid}/denyRequest')
 					except Exception as e:
@@ -122,7 +142,7 @@ def loop():
 					except Exception as e:
 						print(e)
 				else:
-					pass
+					d_pre = d
 			else:
 				pass
 		except Exception as e:

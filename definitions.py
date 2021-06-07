@@ -10,5 +10,5 @@ login_data = {k:v for (k,v) in zip(keys, values)}
 base = 'https://order.mentorium.de/admin/de'
 
 SLEEP_INTERVAL_IN_S = 20
-SERVICE = ['Statistik']
+FACH = ['Statistik']
 SOFTWARE = ['Stata']
