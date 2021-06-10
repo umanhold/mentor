@@ -23,6 +23,12 @@ def login():
 	except requests.exceptions.SSLError as e:
 		print(e)
 
+def list2str(strlist):
+	string = ''
+	for e in strlist:
+		string = string + e.replace('  ','')
+	return string
+
 def parse_project(s, match):
 	''' parse project 
 	0 bestellnr
@@ -49,33 +55,16 @@ def parse_project(s, match):
 		r = s.get(url)
 		trs = BeautifulSoup(r.content, 'html5lib').findAll('tr', {'class': 'sonata-ba-view-container'})
 
-		if len(trs[4].text.split()) > 1:
-			ue = trs[4].text.split()[1]
-		else:
-			ue = 'Keine Angabe'
-
-		if len(trs[5].text.split()) > 1:
-			sprache = trs[5].text.split()[1]
-		else:
-			sprache = 'Keine Angabe'
-
-		if len(trs[8].text.split()) > 1:
-			software = trs[8].text.split()[1]
-		else:
-			software = 'Keine Angabe'
-
-		d = {
-			'Bestellnummer': trs[0].text.split()[1],
-			'Service': trs[1].text.split()[1],
-			'Fach': trs[2].text.split()[1],
-			'UE': ue,
-			'Sprache': sprache,
-			'Umsetzungsdauer': trs[6].text.split()[1],
-			'Fachbereich': trs[7].text.split()[1],
-			'Software': software,
-			'Von': trs[15].text.split()[1],
-			'Bis': trs[15].text.split()[3]
-		}
+		project = [trs[i].text for i in range(0,16)]
+		keys = [item.strip().split('\n')[0] for item in project]
+		values = []
+		for item in project:
+			value = list2str(item.strip().split('\n')[1:])
+			if value == '':
+				value = 'Keine Angabe'
+			values.append(value)
+			
+		d = {k:v for (k,v) in zip(keys, values)}
 
 		return d, oid, s
 
@@ -120,23 +109,22 @@ def loop():
 					"\n\n"
 					+"Service: "+d["Service"]+"\n"
 					+"Fach: "+d["Fach"]+"\n"
-					+"UE: "+d["UE"]+"\n"
-					+'Sprache: '+ d['Sprache']+'\n'
-					+'Fachbereich: '+d['Fachbereich']+'\n'
-					+'Software: '+d['Software']+'\n'
-					+'Von: '+d['Von']+'\n'
-					+'Bis: '+d['Bis']+'\n\n'
+					+"Unterrichtseinheiten: "+d["Unterrichtseinheiten"]+"\n"
+					+"Sprache: "+d["Sprache"]+"\n"
+					+"Umsetzungsdauer: "+d["Umsetzungsdauer"]+"\n"
+					+"Fachbereich: "+d["Fachbereich"]+"\n"
+					+"Software: "+d["Software"]+"\n"
+					+"Umsetzungszeitraum: "+d["Umsetzungszeitraum"]+"\n\n"
 				)
 
 				print(project_description)
 
-
-				if d['Fach'] in FACH:
+				if 'Datenanalyse' not in d['Service'] and 'Datenanalyse' not in d['Fach']:
 					try:
 						r = s.get(f'{base}/freelancer/requested_course_orders/{oid}/denyRequest')
 					except Exception as e:
 						print(e)
-				elif d['Software'] in SOFTWARE:
+				elif 'Stata' in d['Software']:
 					try:
 						r = s.get(f'{base}/freelancer/requested_course_orders/{oid}/acceptRequest')
 					except Exception as e:
